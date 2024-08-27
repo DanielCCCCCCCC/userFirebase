@@ -2,41 +2,37 @@ import { defineStore } from "pinia";
 import {
   createUserWithEmailAndPassword,
   onAuthStateChanged,
+  sendEmailVerification,
   signInWithEmailAndPassword,
   signOut,
 } from "firebase/auth";
+import { auth } from "../firebaseConfig";
 import router from "../routers";
+import { useDatabaseStore } from "./database";
 
-// import router from "../router/index";
-
-import { auth } from "../firebaseConfig"; // Asegúrate de tener esta importación
 export const useUserStore = defineStore("userStore", {
   state: () => ({
     userData: null,
-    loadingUsers: false,
+    loadingUser: false,
     loadingSession: false,
   }),
   actions: {
     async registerUser(email, password) {
-      this.loadingUsers = true;
+      this.loadingUser = true;
       try {
-        const { user } = await createUserWithEmailAndPassword(
-          auth,
-          email,
-          password
-        );
-        this.userData = { email: user.email, uid: user.uid };
+        await createUserWithEmailAndPassword(auth, email, password);
+        // this.userData = { email: user.email, uid: user.uid };
+        await sendEmailVerification(auth.currentUser);
         router.push("/login");
-        console.log(user);
-      } catch (e) {
-        alert("Error: Usuario ya registrado ");
-        console.log(e.message);
+      } catch (error) {
+        console.log(error.code);
+        return error.code;
       } finally {
-        this.loadingUsers = false;
+        this.loadingUser = false;
       }
     },
-    async loginUsers(email, password) {
-      this.loadingUsers = true;
+    async loginUser(email, password) {
+      this.loadingUser = true;
       try {
         const { user } = await signInWithEmailAndPassword(
           auth,
@@ -44,36 +40,41 @@ export const useUserStore = defineStore("userStore", {
           password
         );
         this.userData = { email: user.email, uid: user.uid };
-        router.push("/home");
-      } catch (e) {
-        alert("Error: Credenciales incorrectas");
-        console.log(e.message);
+        router.push("/");
+      } catch (error) {
+        console.log(error.code);
+        return error.code;
       } finally {
-        this.loadingUsers = false;
+        this.loadingUser = false;
       }
     },
-
     async logoutUser() {
+      const databaseStore = useDatabaseStore();
+      databaseStore.$reset();
       try {
         await signOut(auth);
         this.userData = null;
         router.push("/login");
-      } catch (e) {
-        console.log(e.message);
+      } catch (error) {
+        console.log(error);
       }
     },
-
     currentUser() {
       return new Promise((resolve, reject) => {
         const unsuscribe = onAuthStateChanged(
           auth,
           (user) => {
             if (user) {
-              this.userData = { email: user.email, uid: user.uid };
+              this.userData = {
+                email: user.email,
+                uid: user.uid,
+              };
             } else {
               this.userData = null;
+              const databaseStore = useDatabaseStore();
+              databaseStore.$reset();
             }
-            resolve(user); //devuelve del usuario independiente si existe o no
+            resolve(user);
           },
           (e) => reject(e)
         );

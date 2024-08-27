@@ -1,60 +1,95 @@
 <template>
-  <div class="container mt-5">
-    <h1 class="mb-4">Login</h1>
-    <form @submit.prevent="handleSubmit" class="bg-light p-4 rounded shadow">
-      <div class="mb-3">
-        <label for="email" class="form-label">Email</label>
-        <input
-          v-model.trim="email"
-          id="email"
-          type="email"
-          class="form-control"
-          placeholder="Ingrese Email"
-        />
-      </div>
-
-      <div class="mb-3">
-        <label for="password" class="form-label">Contraseña</label>
-        <input
-          v-model.trim="password"
-          id="password"
-          type="password"
-          class="form-control"
-          placeholder="Ingrese contraseña"
-        />
-      </div>
-
-      <button
-        :disabled="userStores.loadingUsers"
-        type="submit"
-        class="btn btn-primary w-100"
+  <h1 class="text-center">Login</h1>
+  <a-row>
+    <a-col :xs="{ span: 24 }" :sm="{ span: 12, offset: 6 }">
+      <a-form
+        name="basicLogin"
+        autocomplete="off"
+        layout="vertical"
+        :model="formState"
+        @finish="onFinish"
+        @finishFailed="onFinishFailed"
       >
-        Acceso
-      </button>
-    </form>
-  </div>
+        <a-form-item
+          name="email"
+          label="Ingrese tu correo"
+          :rules="[
+            {
+              required: true,
+              whitespace: true,
+              type: 'email',
+              message: 'Ingresa un email válido',
+            },
+          ]"
+        >
+          <a-input v-model:value="formState.email"></a-input>
+        </a-form-item>
+        <a-form-item
+          name="password"
+          label="Ingrese contraseña"
+          :rules="[
+            {
+              required: true,
+              min: 6,
+              whitespace: true,
+              message: 'Ingresa una contraseña con mínimo 6 carácteres',
+            },
+          ]"
+        >
+          <a-input-password
+            v-model:value="formState.password"
+          ></a-input-password>
+        </a-form-item>
+        <a-form-item>
+          <a-button
+            type="primary"
+            html-type="submit"
+            :disabled="userStore.loadingUser"
+            :loading="userStore.loadingUser"
+            >Ingresar</a-button
+          >
+        </a-form-item>
+      </a-form>
+    </a-col>
+  </a-row>
 </template>
 
-<style scoped>
-/* Puedes agregar estilos adicionales aquí si lo deseas */
-</style>
-
 <script setup>
-import { ref } from "vue";
+import { reactive } from "vue";
 import { useUserStore } from "../store/user";
-import { useRouter } from "vue-router";
+import { message } from "ant-design-vue";
 
-const userStores = useUserStore();
-// const router = useRouter();
-const email = ref("");
-const password = ref("");
+const userStore = useUserStore();
 
-const handleSubmit = async () => {
-  if (!email.value || password.value.length < 6) {
-    console.log("Procesando formulario ");
-    return alert("Llena los campos");
+const formState = reactive({
+  email: "daniel@gmail.com",
+  password: "1234567",
+});
+
+const onFinish = async (values) => {
+  console.log("Success:", values);
+  const error = await userStore.loginUser(formState.email, formState.password);
+
+  if (!error) {
+    return message.success("Bienvenidos a la super apps 💋");
   }
-  await userStores.loginUsers(email.value, password.value);
-  //   router.push("/home");
+
+  switch (error) {
+    case "auth/user-not-found":
+      message.error("No existe el correo registrado 💋");
+      break;
+    case "auth/wrong-password":
+      message.error("Error de contraseña 💋");
+      break;
+    default:
+      message.error(
+        "Ocurrió un error en el servidor 💋 intentelo más tarde..."
+      );
+      break;
+  }
+};
+
+const onFinishFailed = (errorInfo) => {
+  console.log("Failed:", errorInfo);
 };
 </script>

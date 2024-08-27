@@ -1,72 +1,66 @@
-<script setup>
-import { RouterLink, RouterView } from "vue-router";
-// import HelloWorld from "./components/HelloWorld.vue";
-import { useUserStore } from "./store/user";
-// import { Home } from "./views/Home.vue";
-const userStore = useUserStore();
-</script>
 <template>
-  <nav
-    v-if="!userStore.loadingSession"
-    class="p-3 bg-light shadow-sm mb-1 d-flex"
-  >
-    <div class="container d-flex justify-content-end">
-      <a class="navbar-brand me-auto" href="#">MiApp</a>
-      <div class="d-flex align-items-center">
-        <ul class="navbar-nav d-flex flex-row justify-content-end mb-1 mb-md-0">
-          <li class="nav-item mx-2">
-            <RouterLink to="/home" class="nav-link" v-if="userStore.userData"
-              >Home</RouterLink
-            >
-          </li>
-          <li class="nav-item mx-2">
-            <RouterLink to="/login" class="nav-link" v-if="!userStore.userData"
-              >Login</RouterLink
-            >
-          </li>
-          <li class="nav-item mx-2">
-            <RouterLink
-              to="/register"
-              class="nav-link"
-              v-if="!userStore.userData"
-              >Register</RouterLink
-            >
-          </li>
-        </ul>
-        <button
+  <a-layout>
+    <a-layout-header v-if="!userStore.loadingSession">
+      <a-menu
+        theme="dark"
+        mode="horizontal"
+        :style="{ lineHeight: '64px' }"
+        v-model:selectedKeys="selectedKeys"
+      >
+        <a-menu-item v-if="userStore.userData" key="home">
+          <router-link to="/">Home</router-link>
+        </a-menu-item>
+        <a-menu-item v-if="!userStore.userData" key="login">
+          <router-link to="/login">Login</router-link>
+        </a-menu-item>
+        <a-menu-item v-if="!userStore.userData" key="register">
+          <router-link to="/register">Register</router-link>
+        </a-menu-item>
+        <a-menu-item
           @click="userStore.logoutUser"
-          class="btn btn-outline-danger ms-3"
           v-if="userStore.userData"
+          key="logout"
         >
           Logout
-        </button>
+        </a-menu-item>
+      </a-menu>
+      <nav>| | |</nav>
+    </a-layout-header>
+    <a-layout-content style="padding: 0 50px">
+      <div class="container">
+        <div v-if="userStore.loadingSession">loading user...</div>
+        <router-view></router-view>
       </div>
-    </div>
-  </nav>
-  <div v-else>loading user...</div>
-  <RouterView />
-  <!-- <Home /> -->
+    </a-layout-content>
+  </a-layout>
 </template>
 
-<style scoped>
-.navbar {
-  min-height: 100px; /* Establece una altura mínima para centrar el contenido */
-}
+<script setup>
+import { ref, watch } from "vue";
+import { useUserStore } from "./store/user";
+import { useRoute } from "vue-router";
 
+const userStore = useUserStore();
+const route = useRoute();
+
+const selectedKeys = ref([]);
+
+// console.log(route.name);
+watch(
+  () => route.name,
+  () => {
+    selectedKeys.value = [route.name];
+  }
+);
+</script>
+
+<style>
 .container {
-  max-width: 600px; /* Limita el ancho del contenido */
+  background-color: #fff;
+  padding: 24px;
+  min-height: calc(100vh - 64px);
 }
-
-.navbar-nav {
-  flex-grow: 1;
-}
-
-.nav-link {
+.text-center {
   text-align: center;
-}
-
-.btn {
-  align-self: center;
-  width: 100px; /* Ancho fijo para el botón */
 }
 </style>
