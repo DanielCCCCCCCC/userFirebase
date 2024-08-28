@@ -74,9 +74,9 @@ import { message } from "ant-design-vue";
 const userStore = useUserStore();
 
 const formState = reactive({
-  email: "bluuweb1@test.com",
-  password: "123123",
-  repassword: "123123",
+  email: "",
+  password: "",
+  repassword: "",
 });
 
 const validatePass = async (_rule, value) => {

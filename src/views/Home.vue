@@ -1,8 +1,15 @@
 <template>
   <div>
     <h1>Home Ruta protegida</h1>
-    <p>{{ userStore.userData?.email }}</p>
-
+    <div class="user-info mt-2" style="display: flex; align-items: center">
+      <a-avatar
+        :src="userStore.userData.photoURL"
+        :size="60"
+        style="margin-right: 12px"
+      ></a-avatar>
+      <p style="margin: 0">{{ userStore.userData?.email }}</p>
+    </div>
+    <!-- <p>{{ userStore.userData }}</p> -->
     <add-form></add-form>
 
     <p v-if="databaseStore.loadingDoc">loading docs...</p>
@@ -53,7 +60,7 @@ const userStore = useUserStore();
 const databaseStore = useDatabaseStore();
 const router = useRouter();
 databaseStore.getUrls();
-console.log(userStore.documents);
+// console.log(userStore.documents);
 
 const confirm = async (id) => {
   const error = await databaseStore.deleteUrl(id);
@@ -65,3 +72,9 @@ const cancel = () => {
   message.error("no se eliminó 💋");
 };
 </script>
+
+<style scoped>
+.mt-2 {
+  margin-bottom: 2rem;
+}
+</style>

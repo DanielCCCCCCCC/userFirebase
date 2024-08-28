@@ -35,14 +35,14 @@ export const useDatabaseStore = defineStore("database", {
         );
         const querySnapshot = await getDocs(q);
         querySnapshot.forEach((doc) => {
-          console.log("ID", doc.id, "data", doc.data());
+          // console.log("ID", doc.id, "data", doc.data());
           this.documents.push({
             id: doc.id,
             ...doc.data(),
           });
         });
       } catch (error) {
-        console.log(error);
+        // console.log(error);
       } finally {
         this.loadingDoc = false;
       }
@@ -62,7 +62,7 @@ export const useDatabaseStore = defineStore("database", {
           id: docRef.id,
         });
       } catch (error) {
-        console.log(error.code);
+        // console.log(error.code);
         return error.code;
       } finally {
         this.loading = false;
@@ -83,7 +83,7 @@ export const useDatabaseStore = defineStore("database", {
 
         return docSpan.data().name;
       } catch (error) {
-        console.log(error.message);
+        // console.log(error.message);
       } finally {
       }
     },
@@ -110,7 +110,7 @@ export const useDatabaseStore = defineStore("database", {
         );
         router.push("/");
       } catch (error) {
-        console.log(error.message);
+        // console.log(error.message);
         return error.message;
       } finally {
         this.loading = false;

@@ -62,12 +62,12 @@ import { message } from "ant-design-vue";
 const userStore = useUserStore();
 
 const formState = reactive({
-  email: "daniel@gmail.com",
-  password: "1234567",
+  email: "",
+  password: "",
 });
 
 const onFinish = async (values) => {
-  console.log("Success:", values);
+  // console.log("Success:", values);
   const error = await userStore.loginUser(formState.email, formState.password);
 
   if (!error) {
